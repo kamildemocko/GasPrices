@@ -72,17 +72,26 @@ def _parse_url(response: httpx.Response) -> list[GasStationItem]:
         assert len(fuel_nodes) == 3
 
         gas = fuel_nodes[0]
+        gas_price = _parse_price(gas.text())
         diesel = fuel_nodes[1]
+        diesel_price = _parse_price(diesel.text())
         lpg = fuel_nodes[2]
+        lpg_price = _parse_price(lpg.text())
+
+        if gas_price is None and diesel_price is None and lpg_price is None:
+            continue
 
         last_updated = prices_node.css_first(".last_upd_fuel")
         last_updated = "" if last_updated is None else last_updated.text()
 
+        if last_updated == "":
+            continue
+
         gas_stations.append(GasStationItem(
             name=title.text(),
-            gas=_parse_price(gas.text()),
-            diesel=_parse_price(diesel.text()),
-            lpg=_parse_price(lpg.text()),
+            gas=gas_price,
+            diesel=diesel_price,
+            lpg=lpg_price,
             last_updated=_parse_date(last_updated),
             location=city.text(),
             lat=latlon[0],

@@ -26,6 +26,7 @@ async def main() -> None:
 
         all_urls_responses.extend(responses_expanded)
 
+    print(all_urls_responses)
     store.insert_prices(all_urls_responses)
 
 if __name__ == "__main__":

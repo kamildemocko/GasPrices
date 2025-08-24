@@ -29,7 +29,8 @@ class Store:
             last_updated TIMESTAMP,
             location TEXT NOT NULL,
             lat DOUBLE PRECISION NOT NULL,
-            lon DOUBLE PRECISION NOT NULL
+            lon DOUBLE PRECISION NOT NULL,
+            CONSTRAINT uniq_name_last_updated UNIQUE(name, last_updated)
         );
         """
 
@@ -50,7 +51,8 @@ class Store:
         INSERT INTO {self.schema}.{self.table_name}
         (name, gas, diesel, lpg, last_updated, location, lat, lon)
         VALUES
-        (%s, %s, %s, %s, %s, %s, %s, %s);
+        (%s, %s, %s, %s, %s, %s, %s, %s)
+        ON CONFLICT (name, last_updated) DO NOTHING;
         """
 
         data = [

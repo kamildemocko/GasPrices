@@ -6,7 +6,7 @@ import arrow
 import httpx
 from selectolax.parser import HTMLParser
 
-from model import GasStationItem
+from shared.model import GasStationItem
 
 
 def _parse_price(value: str | None) -> float | None:

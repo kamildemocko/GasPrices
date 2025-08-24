@@ -2,7 +2,7 @@ import atexit
 
 import psycopg
 
-from model import GasStationItem
+from shared.model import GasStationItem
 
 
 class Store:

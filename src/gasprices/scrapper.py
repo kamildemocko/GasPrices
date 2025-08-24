@@ -1,3 +1,6 @@
+import sys
+sys.path.insert(0, "../")
+
 import os
 import asyncio
 from pathlib import Path
@@ -5,12 +8,14 @@ from pathlib import Path
 import httpx
 from dotenv import load_dotenv
 
-from fetchers import fetch_url, fetch_urls_from_file
-from model import GasStationItem
-from store import Store
+from shared.fetchers import fetch_url, fetch_urls_from_file
+from shared.model import GasStationItem
+from shared.store import Store
 
 
 async def main() -> None:
+    print("getting prices...")
+
     urls_path = Path("urls.txt")
     urls = fetch_urls_from_file(urls_path)
 
@@ -26,8 +31,10 @@ async def main() -> None:
 
         all_urls_responses.extend(responses_expanded)
 
-    print(all_urls_responses)
+    print("inserting into DB...")
     store.insert_prices(all_urls_responses)
+    
+    print("done")
 
 if __name__ == "__main__":
     load_dotenv()

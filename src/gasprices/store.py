@@ -2,16 +2,18 @@ import atexit
 
 import psycopg
 
+from model import GasStationItem
+
 
 class Store:
     def __init__(self, dsn: str) -> None:
         self.con = psycopg.connect(dsn)
         atexit.register(self.con.close)
 
-        schema = "gasprices"
-        table_name = "prices"
+        self.schema = "gasprices"
+        self.table_name = "prices"
 
-        self._create_table(schema, table_name)
+        self._create_table(self.schema, self.table_name)
     
     def _create_table(self, schema: str, table_name: str) -> None:
         query_create_schema = f"CREATE SCHEMA IF NOT EXISTS {schema};"
@@ -19,7 +21,7 @@ class Store:
         query_create_table = f"""
         CREATE TABLE IF NOT EXISTS {schema}.{table_name} (
             id SERIAL PRIMARY KEY,
-            created TIMESTAMP NOT NULL,
+            created TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
             name TEXT NOT NULL,
             gas DOUBLE PRECISION,
             diesel DOUBLE PRECISION,
@@ -40,5 +42,23 @@ class Store:
             cur.execute(query_create_schema)  # type: ignore
             cur.execute(query_create_table)  # type: ignore
             cur.execute(query_create_indexes)  # type: ignore
+        
+        self.con.commit()
+    
+    def insert_prices(self, items: list[GasStationItem]) -> None:
+        query = f"""
+        INSERT INTO {self.schema}.{self.table_name}
+        (name, gas, diesel, lpg, last_updated, location, lat, lon)
+        VALUES
+        (%s, %s, %s, %s, %s, %s, %s, %s);
+        """
+
+        data = [
+            (i.name, i.gas, i.diesel, i.lpg, i.last_updated, i.location, i.lat, i.lon) 
+            for i in items
+        ]
+
+        with self.con.cursor() as cur:
+            cur.executemany(query, data)  # type: ignore
         
         self.con.commit()

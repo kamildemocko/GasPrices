@@ -17,16 +17,16 @@ async def main() -> None:
     pg_dsn = os.getenv("DSN", "")
     store = Store(pg_dsn)
 
-    all_urls_responses: list[list[GasStationItem]] = []
+    all_urls_responses: list[GasStationItem] = []
 
     async with httpx.AsyncClient() as client:
         tasks = [fetch_url(client, url) for url in urls]
         responses = await asyncio.gather(*tasks)
+        responses_expanded = [item for sublist in responses for item in sublist]
 
-        all_urls_responses.extend(responses)
+        all_urls_responses.extend(responses_expanded)
 
-    print(all_urls_responses)
-
+    store.insert_prices(all_urls_responses)
 
 if __name__ == "__main__":
     load_dotenv()

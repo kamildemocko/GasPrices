@@ -1,8 +1,9 @@
 import atexit
 
 import psycopg
+import arrow
 
-from shared.model import GasStationItem
+from shared.model import GasStationItems, GasStationItem
 
 
 class Store:
@@ -47,7 +48,7 @@ class Store:
         
         self.con.commit()
     
-    def insert_prices(self, items: list[GasStationItem]) -> None:
+    def insert_prices(self, items: GasStationItems) -> None:
         query = f"""
         INSERT INTO {self.schema}.{self.table_name}
         (name, station, gas, diesel, lpg, last_updated, location, lat, lon)
@@ -65,3 +66,19 @@ class Store:
             cur.executemany(query, data)  # type: ignore
         
         self.con.commit()
+    
+    def get_prices_days(self, days: int) -> GasStationItems:
+        today = arrow.now()
+        then = today.shift(days=int(f"-{days}"))
+        query = f"""
+        SELECT name, station, gas, diesel, lpg, last_updated, location, lat, lon 
+        FROM {self.schema}.{self.table_name}
+        WHERE created >= %s AND created <= %s
+        """
+        
+        with self.con.cursor() as cur:
+            cur.execute(query, (then.datetime, today.datetime))
+            rows = cur.fetchall()
+            items = [GasStationItem(*row) for row in rows]
+        
+        return GasStationItems(items=items)

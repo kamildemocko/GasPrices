@@ -6,7 +6,7 @@ import arrow
 import httpx
 from selectolax.parser import HTMLParser
 
-from shared.model import GasStationItem
+from shared.model import GasStationItems, GasStationItem
 
 
 def _parse_price(value: str | None) -> float | None:
@@ -49,7 +49,7 @@ def _parse_latlon(value: str | None) -> tuple[float, float]:
     return float(r[0]), float(r[1])
 
 
-def _parse_url(response: httpx.Response) -> list[GasStationItem]:
+def _parse_url(response: httpx.Response) -> GasStationItems:
     tree = HTMLParser(response.content)
     items = tree.css(".gas_block_1")
 
@@ -108,7 +108,7 @@ def _parse_url(response: httpx.Response) -> list[GasStationItem]:
     return gas_stations
 
 
-async def fetch_url(client: httpx.AsyncClient, url: str) -> list[GasStationItem]:
+async def fetch_url(client: httpx.AsyncClient, url: str) -> GasStationItems:
     try:
         res = await client.get(url)
         res.raise_for_status()

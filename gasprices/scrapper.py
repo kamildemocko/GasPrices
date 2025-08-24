@@ -9,7 +9,7 @@ import httpx
 from dotenv import load_dotenv
 
 from shared.fetchers import fetch_url, fetch_urls_from_file
-from shared.model import GasStationItem
+from shared.model import GasStationItems
 from shared.store import Store
 
 
@@ -22,7 +22,7 @@ async def main() -> None:
     pg_dsn = os.getenv("DSN", "")
     store = Store(pg_dsn)
 
-    all_urls_responses: list[GasStationItem] = []
+    all_urls_responses: GasStationItems = []
 
     async with httpx.AsyncClient() as client:
         tasks = [fetch_url(client, url) for url in urls]

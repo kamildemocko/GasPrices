@@ -3,25 +3,23 @@ from pathlib import Path
 
 import httpx
 
-from fetchers import fetch_url
+from fetchers import fetch_url, fetch_urls_from_file
+from model import GasStationItem
 
 
 async def main() -> None:
     urls_path = Path("urls.txt")
+    urls = fetch_urls_from_file(urls_path)
 
-    urls: list[str] = []
-    with urls_path.open("r", encoding="utf-8") as file:
-        for line in file.readlines():
-            if line.startswith("#"):
-                continue
-
-            urls.append(line.strip())
+    all_urls_responses: list[list[GasStationItem]] = []
 
     async with httpx.AsyncClient() as client:
         tasks = [fetch_url(client, url) for url in urls]
         responses = await asyncio.gather(*tasks)
 
-        print(responses)
+        all_urls_responses.extend(responses)
+
+    print(all_urls_responses)
 
 
 if __name__ == "__main__":

@@ -1,5 +1,6 @@
 import re
 from datetime import datetime
+from pathlib import Path
 
 import arrow
 import httpx
@@ -101,3 +102,16 @@ async def fetch_url(client: httpx.AsyncClient, url: str) -> list[GasStationItem]
         return []
 
     return _parse_url(res)
+
+
+def fetch_urls_from_file(path: Path) -> list[str]:
+    urls: list[str] = []
+
+    with path.open("r", encoding="utf-8") as file:
+        for line in file.readlines():
+            if line.startswith("#"):
+                continue
+
+            urls.append(line.strip())
+    
+    return urls

@@ -23,6 +23,7 @@ class Store:
             id SERIAL PRIMARY KEY,
             created TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
             name TEXT NOT NULL,
+            station TEXT NOT NULL,
             gas DOUBLE PRECISION,
             diesel DOUBLE PRECISION,
             lpg DOUBLE PRECISION,
@@ -30,7 +31,7 @@ class Store:
             location TEXT NOT NULL,
             lat DOUBLE PRECISION NOT NULL,
             lon DOUBLE PRECISION NOT NULL,
-            CONSTRAINT uniq_name_last_updated UNIQUE(name, last_updated)
+            CONSTRAINT uniq_name_station_last_updated UNIQUE(name, station, last_updated)
         );
         """
 
@@ -49,14 +50,14 @@ class Store:
     def insert_prices(self, items: list[GasStationItem]) -> None:
         query = f"""
         INSERT INTO {self.schema}.{self.table_name}
-        (name, gas, diesel, lpg, last_updated, location, lat, lon)
+        (name, station, gas, diesel, lpg, last_updated, location, lat, lon)
         VALUES
-        (%s, %s, %s, %s, %s, %s, %s, %s)
-        ON CONFLICT (name, last_updated) DO NOTHING;
+        (%s, %s, %s, %s, %s, %s, %s, %s, %s)
+        ON CONFLICT (name, station, last_updated) DO NOTHING;
         """
 
         data = [
-            (i.name, i.gas, i.diesel, i.lpg, i.last_updated, i.location, i.lat, i.lon) 
+            (i.name, i.station, i.gas, i.diesel, i.lpg, i.last_updated, i.location, i.lat, i.lon) 
             for i in items
         ]
 

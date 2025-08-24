@@ -5,6 +5,7 @@ from datetime import datetime
 @dataclass
 class GasStationItem:
     name: str
+    station: str
     gas: float | None
     diesel: float | None
     lpg: float | None

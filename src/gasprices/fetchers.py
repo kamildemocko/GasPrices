@@ -56,8 +56,14 @@ def _parse_url(response: httpx.Response) -> list[GasStationItem]:
     gas_stations =[]
     for item in items:
         title = item.css_first("h2")
-        city = item.css_first("p a")
         assert title is not None
+
+        title_parts = title.text().split("/", maxsplit=1)
+        assert len(title_parts) == 2
+        station = title_parts[0]
+        name = title_parts[1]
+
+        city = item.css_first("p a")
         assert city is not None
 
         latlon_holder = item.css_first("p")
@@ -88,7 +94,8 @@ def _parse_url(response: httpx.Response) -> list[GasStationItem]:
             continue
 
         gas_stations.append(GasStationItem(
-            name=title.text(),
+            name=name.strip(),
+            station=station.strip(),
             gas=gas_price,
             diesel=diesel_price,
             lpg=lpg_price,
